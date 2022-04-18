@@ -1,4 +1,5 @@
 //rafc => crear estructura jsx
+import {Link} from 'react-router-dom';
 const Login = () => {
   return (
     <>
@@ -16,6 +17,10 @@ const Login = () => {
 
         <input type="submit" value="Iniciar Sesión" className="bg-sky-700 mb-5 text-white py-3 w-full uppercase font-bold rounded hover:cursor-pointer hover:bg-sky-800 transition-colors" />
       </form>
+      <nav className="lg:flex lg:justify-between">
+        <Link to="/registrar" className="block text-center my-5 text-slate-500 uppercase text-sm">¿No tienes cuenta? Registrate.</Link>
+        <Link to="/olvide-password" className="block text-center my-5 text-slate-500 uppercase text-sm">¿Olvidaste el password? Recuperar.</Link>
+      </nav>
     </>
   );
 }
