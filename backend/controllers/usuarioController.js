@@ -1,6 +1,7 @@
 import Usuario from '../models/User.js';
 import generarId from '../helpers/generarId.js';
 import generarJWT from '../helpers/generarJWT.js';
+import { emailRegistro, emailOlvidePassword } from '../helpers/email.js';
 
 //Registar usuario
 const registrar = async (req, res) => {
@@ -17,6 +18,12 @@ const registrar = async (req, res) => {
       usuario.token = generarId();
       await usuario.save();
 
+      //Enviar email de confirmacion
+      emailRegistro({
+        email: usuario.email,
+        nombre: usuario.nombre,
+        token: usuario.token
+      });
 
       res.json({
         msg: 'Usuario registrado con éxito, revisa tu email para confirmar tu cuenta.'
@@ -68,7 +75,7 @@ const confirmar = async (req, res) => {
 
   if (!usuarioConfirmar) {
     const error = new Error('Token no valido');
-    return res.status(404).json({ msg: error.message });
+    return res.status(403).json({ msg: error.message });
   }
 
   try {
@@ -98,6 +105,14 @@ const recuperarPassword = async (req, res) => {
     try {
       usuario.token = generarId();
       await usuario.save();
+
+      //Enviar email de confirmacion
+      emailOlvidePassword({
+        email: usuario.email,
+        nombre: usuario.nombre,
+        token: usuario.token
+      });
+
       res.json({msg:'Hemos enviado un email con las nuevas instrucciones'});
     } catch (error) {
       console.log(error);
