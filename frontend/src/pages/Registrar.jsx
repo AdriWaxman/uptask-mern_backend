@@ -44,6 +44,7 @@ const Registrar = () => {
     setAlerta({});
 
     //Enviar el request al backend
+    //TODO: Mover hacia un cliente axios
     try {
       const {data} = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/usuarios`, {
         nombre,
