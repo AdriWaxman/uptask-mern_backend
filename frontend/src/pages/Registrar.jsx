@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import Alerta from '../components/Alerta';
-import axios from 'axios';
+import clientAxios from '../config/clientAxios';
 
 const Registrar = () => {
 
@@ -44,9 +44,9 @@ const Registrar = () => {
     setAlerta({});
 
     //Enviar el request al backend
-    //TODO: Mover hacia un cliente axios
+   
     try {
-      const {data} = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/usuarios`, {
+      const {data} = await clientAxios.post(`/usuarios`, {
         nombre,
         email,
         password

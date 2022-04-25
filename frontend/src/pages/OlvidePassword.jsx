@@ -1,7 +1,7 @@
 import {Link} from 'react-router-dom';
 import {useState} from 'react';
 import Alerta from '../components/Alerta';
-import axios from 'axios';
+import clientAxios from '../config/clientAxios';
 
 export const OlvidePassword = () => {
 
@@ -21,7 +21,7 @@ export const OlvidePassword = () => {
     }
     try {
       
-      const {data} = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/usuarios/recuperar-password`, {email});
+      const {data} = await clientAxios.post(`/usuarios/recuperar-password`, {email});
       console.log(data);
 
       setAlerta({

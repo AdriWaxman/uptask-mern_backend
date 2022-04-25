@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import axios from 'axios';
+import clientAxios from '../config/clientAxios';
 import Alerta from '../components/Alerta';
 
 export const NuevoPassword = () => {
@@ -19,8 +19,8 @@ export const NuevoPassword = () => {
 
       try {
 
-        //TODO: Mover hacia axios client
-         await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/usuarios/recuperar-password/${token}`);
+     
+         await clientAxios.get(`/usuarios/recuperar-password/${token}`);
           setTokenValido(true);
         
       } catch (error) {
@@ -50,8 +50,8 @@ export const NuevoPassword = () => {
       return;
     }
     try {
-        const url = `${import.meta.env.VITE_BACKEND_URL}/api/usuarios/recuperar-password/${token}`;
-        const {data} = await axios.post(url, {password});
+        const url = `/usuarios/recuperar-password/${token}`;
+        const {data} = await clientAxios.post(url, {password});
         setAlerta({
           msg:data.msg,
           error:false
