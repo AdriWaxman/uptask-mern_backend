@@ -62,7 +62,7 @@ const login = async (req, res) => {
     });
     
   } else {
-    const error = new Error('El password es incorrecto');
+    const error = new Error('El password es incorrecto'); 
     return res.status(403).json({ msg: error.message });
   }
 };
