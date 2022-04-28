@@ -2,6 +2,10 @@ import React from 'react'
 
 export const Proyectos = () => {
   return (
-    <div>Proyectos</div>
+    <>
+    <h1 className="text-4xl font-black">Proyectos</h1>
+
+      <div></div>
+    </>
   )
 }
