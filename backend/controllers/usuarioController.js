@@ -53,7 +53,7 @@ const login = async (req, res) => {
   }
   //Comprobaremos si el password es correcto
   if(await usuario.comprobarPassword(password)) {
-    console.log("correcto");
+    
     res.json({
       _id: usuario._id,
       nombre: usuario.nombre,
