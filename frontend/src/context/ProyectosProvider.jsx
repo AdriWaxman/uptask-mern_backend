@@ -10,6 +10,7 @@ const ProyectosProvider = ({children}) => {
   const [alerta,setAlerta] = useState({});
   const [proyecto, setProyecto] = useState({});
   const [cargando, setCargando] = useState(false);
+  const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,35 +46,79 @@ const ProyectosProvider = ({children}) => {
 
  
   const submitProyecto = async(proyecto) => {
-    //console.log(proyecto);
-    try {
-      const token = localStorage.getItem('token');
-      if(!token) return;
-
-      const config = {
-        headers: {
-          "Content-Type":"application/json",
-          "Authorization":`Bearer ${token}`
-        }
+      if(proyecto.id){
+          await editarProyecto(proyecto);
+      }else{
+        await nuevoProyecto(proyecto);
       }
+      return;
+   
+}
 
-      const { data } = await clientAxios.post('/proyectos', proyecto, config);
-      setProyectos([...proyectos, data]);
+const editarProyecto = async proyecto => {
+    
+  try {
+    const token = localStorage.getItem('token');
+    if(!token) return;
 
-     setAlerta({
-        msg:"Proyecto creado correctamente",
-        error:false
-      })
-
-      setTimeout(() =>{
-        setAlerta({});
-        navigate('/proyectos');
-       }, 3000);
-
-    } catch (error) {
-      console.log(error);
-      
+    const config = {
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${token}`
+      }
     }
+
+    const {data} = await clientAxios.put(`/proyectos/${proyecto.id}`, proyecto, config);
+
+    //Sincronizar state
+    const proyectosActualizados = proyectos.map(proyectoState => proyectoState._id === data._id ? data : proyectoState);
+    
+    setProyectos(proyectosActualizados);
+    mostrarAlerta({
+      msg: 'Proyecto editado correctamente',
+      error: false
+    });
+
+    setTimeout(() =>{
+      setAlerta({});
+      //navigate(`/proyectos/${proyecto.id}`);
+      navigate(`/proyectos`);
+     }, 3000);
+    
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const nuevoProyecto = async proyecto => {
+  try {
+    const token = localStorage.getItem('token');
+    if(!token) return;
+
+    const config = {
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${token}`
+      }
+    }
+
+    const { data } = await clientAxios.post('/proyectos', proyecto, config);
+    setProyectos([...proyectos, data]);
+
+   setAlerta({
+      msg:"Proyecto creado correctamente",
+      error:false
+    })
+
+    setTimeout(() =>{
+      setAlerta({});
+      navigate('/proyectos');
+     }, 3000);
+
+  } catch (error) {
+    console.log(error);
+    
+  }
 }
 
 const obtenerProyecto = async(id) => {
@@ -99,6 +144,49 @@ const obtenerProyecto = async(id) => {
   }
 }
 
+const eliminarProyecto = async(id) => {
+  
+  try {
+    const token = localStorage.getItem('token');
+    if(!token) return;
+
+    const config = {
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${token}`
+      }
+    }
+
+    const { data } = await clientAxios.delete(`/proyectos/${id}`, config);
+
+    //Sincronizar state
+    const proyectosActualizados = proyectos.filter(proyectoState => proyectoState._id !== id);
+    setProyectos(proyectosActualizados);
+
+    setAlerta({
+      msg:data.msg,
+      error:false
+    })
+
+    setTimeout(() => {
+        setAlerta({});
+        navigate('/proyectos');
+    },3000)
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const handleModalTarea = () => {
+  setModalFormularioTarea(!modalFormularioTarea);
+}
+
+const submitTarea = async tarea => {
+  console.log(tarea)
+}
+
+
   return(
     <ProyectosContext.Provider
       value={{
@@ -108,7 +196,11 @@ const obtenerProyecto = async(id) => {
         submitProyecto, 
         obtenerProyecto,
         proyecto,
-        cargando
+        cargando,
+        eliminarProyecto,
+        modalFormularioTarea,
+        handleModalTarea,
+        submitTarea
       }}
     >
       {children}

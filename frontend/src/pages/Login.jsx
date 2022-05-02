@@ -32,7 +32,7 @@ const Login = () => {
      setAlerta({});
       localStorage.setItem('token',data.token);
       setAuth(data);
-      //navigate('/');
+      navigate('/proyectos');
     }
     catch(error){
       console.log(error);
