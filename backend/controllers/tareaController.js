@@ -1,5 +1,6 @@
 import Proyecto from "../models/Proyecto.js";
 import Tarea from "../models/Tarea.js";
+
 //Agregar nueva Tarea
 const agregarTarea = async (req,res) => {
   const {proyecto} = req.body;
@@ -16,13 +17,16 @@ const agregarTarea = async (req,res) => {
   //Comprobar si la persona que esta creando la tarea es la misma que el proyecto
   if(existeProyecto.creador.toString() !== req.usuario.id){
     const error = new Error('No tienes permiso para agregar una tarea a este proyecto');
-    return res.status(401).json({
+    return res.status(403).json({
       error: error.message
     });
   }
 
   try {
     const tareaAlmacenada = await Tarea.create(req.body);
+    //Almacenar el ID del proyecto
+    existeProyecto.tareas.push(tareaAlmacenada._id);
+    await existeProyecto.save();
     res.json(tareaAlmacenada);
   } catch (error) {
     console.log(error)
