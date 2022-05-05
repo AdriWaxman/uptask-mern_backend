@@ -1,6 +1,6 @@
 //rafc => crear estructura jsx
 import {Link, useNavigate} from 'react-router-dom';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Alerta from '../components/Alerta';
 import clientAxios from '../config/clientAxios';
 import useAuth from '../hooks/useAuth';
@@ -14,6 +14,13 @@ const Login = () => {
   const navigate = useNavigate();
 
   const {setAuth} = useAuth();
+
+  //Detect login and redirect to projects
+  useEffect(() => {
+    if(localStorage.getItem('token')){
+      navigate('/proyectos');
+    }
+  },[navigate]);
 
 
   const handleSubmit = async (e) => {
