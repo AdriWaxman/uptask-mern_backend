@@ -1,11 +1,16 @@
 import mongoose from 'mongoose';
 import Proyecto from '../models/Proyecto.js';
-import Tarea from '../models/Tarea.js';
+import User from '../models/User.js';
 
 //Obtener proyectos
 const obtenerProyectos = async (req, res) => {
   // const proyectos = await Proyecto.find({ creador: req.usuario._id });
-  const proyectos = await Proyecto.find().where('creador').equals(req.usuario).select('-tareas');
+  const proyectos = await Proyecto.find({
+    '$or': [
+      { 'creador': { $in: req.usuario} },
+      { 'colaboradores': { $in: req.usuario}}
+    ]
+  }).select('-tareas');
 
   // if(!proyectos) {
   //   return res.status(404).json({
@@ -46,7 +51,7 @@ const obtenerProyecto = async (req, res) => {
       msg: error.message
     });
   }
-  const proyecto = await Proyecto.findById(id).populate('tareas');
+  const proyecto = await Proyecto.findById(id).populate({path: 'tareas', populate:{path: 'completado', select: 'nombre'}}).populate('colaboradores', 'nombre email');
 
   if(!proyecto) {
     const error = new Error("No encontrado")
@@ -56,7 +61,7 @@ const obtenerProyecto = async (req, res) => {
   }
 
 
-  if(proyecto.creador.toString() !== req.usuario._id.toString()) {
+  if(proyecto.creador.toString() !== req.usuario._id.toString() && !proyecto.colaboradores.some(colaborador => colaborador._id.toString() === req.usuario._id.toString())) {
     const error = new Error("Usuario no autorizado")
     return res.status(401).json({
       msg: error.message
@@ -157,14 +162,103 @@ const eliminarProyecto = async (req, res) => {
 
 }
 
+//Buscar colaborador
+const buscarColaborador = async (req, res) => {
+  const {email} = req.body;
+  const usuario = await User.findOne({email}).select("-password -createdAt -updatedAt -__v -token -confirmado");
+
+  if(!usuario) {
+    const error = new Error("Usuario no encontrado")
+    return res.status(404).json({
+      msg: error.message
+    });
+  }
+
+  res.json(usuario);
+}
+
 //Agregar colaborador
 const agregarColaborador = async (req, res) => {
+  const proyecto = await Proyecto.findById(req.params.id);
+
+  if(!proyecto){
+    const error = new Error("Proyecto no encontrado")
+    return res.status(404).json({
+      msg: error.message
+    });
+  }
+
+  if(proyecto.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("Usuario no autorizado")
+    return res.status(401).json({
+      msg: error.message
+    });
+  }
+
+  const {email} = req.body;
+  const usuario = await User.findOne({email}).select("-password -createdAt -updatedAt -__v -token -confirmado");
+
+  if(!usuario){
+    const error = new Error("Usuario no encontrado")
+    return res.status(404).json({
+      msg: error.message
+    });
+  }
+
+  //Colaborador no es el admin del proyecto
+  if(proyecto.creador.toString() === usuario._id.toString()) {
+    const error = new Error("El creador del proyecto no puede ser colaborador")
+    return res.status(401).json({
+      msg: error.message
+    });
+  }
+
+  //Revisar que no este agregado al proyecto
+  if(proyecto.colaboradores.includes(usuario._id)) {
+    const error = new Error("El usuario ya es colaborador del proyecto")
+    return res.status(401).json({
+      msg: error.message
+    });
+  }
+
+  //Agregar usuario al proyecto
+  proyecto.colaboradores.push(usuario._id);
+  await proyecto.save();
+  res.json({
+    msg: 'Colaborador agregado correctamente'
+  })
 }
+
 
 //Eliminar colaborador
 const eliminarColaborador = async (req, res) => {
+  const proyecto = await Proyecto.findById(req.params.id);
+
+  if(!proyecto){
+    const error = new Error("Proyecto no encontrado")
+    return res.status(404).json({
+      msg: error.message
+    });
+  }
+
+  if(proyecto.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("Acción no autorizada")
+    return res.status(401).json({
+      msg: error.message
+    });
+  }
+
+   //Eliminar usuario del proyecto
+   proyecto.colaboradores.pull(req.body.id);
+  
+   await proyecto.save();
+   res.json({
+     msg: 'Colaborador eliminado correctamente'
+   })
+
+ 
 }
 
 
 
-export { obtenerProyectos, nuevoProyecto, obtenerProyecto, editarProyecto, eliminarProyecto, agregarColaborador, eliminarColaborador };
+export { obtenerProyectos, nuevoProyecto, obtenerProyecto, editarProyecto, eliminarProyecto,buscarColaborador, agregarColaborador, eliminarColaborador };

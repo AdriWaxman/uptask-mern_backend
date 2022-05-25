@@ -1,6 +1,7 @@
 import Proyecto from "../models/Proyecto.js";
 import Tarea from "../models/Tarea.js";
 
+
 //Agregar nueva Tarea
 const agregarTarea = async (req,res) => {
   const {proyecto} = req.body;
@@ -115,7 +116,15 @@ const eliminarTarea = async (req,res) => {
   }
 
   try {
-    await tarea.deleteOne();
+    const proyecto = await Proyecto.findById(tarea.proyecto);
+    proyecto.tareas.pull(tarea._id);
+  
+
+    await Promise.allSettled([
+      proyecto.save(),
+      tarea.deleteOne(),
+    ]);
+    
     res.json({
       message: 'Tarea eliminada con éxito'
     })
@@ -127,7 +136,34 @@ const eliminarTarea = async (req,res) => {
 
 //Cambiar estado de tarea
 const cambiarEstado = async (req,res) => {
-  console.log(req.body);
+  const {id} = req.params;
+
+  const tarea = await Tarea.findById(id).populate('proyecto');
+
+  if(!tarea){
+    const error = new Error('Tarea no encontrada');
+    return res.status(404).json({
+      error: error.message
+    });
+  }
+
+  if(tarea.proyecto.creador.toString() !== req.usuario._id.toString() && !tarea.proyecto.colaboradores.some(colaborador => colaborador._id.toString() === req.usuario._id.toString())){
+    const error = new Error('No tienes permiso para ver esta tarea');
+    return res.status(403).json({
+      error: error.message
+    });
+  }
+  //cambiar estado tarea y guardar
+  tarea.estado = !tarea.estado;
+  tarea.completado = req.usuario._id;
+
+  await tarea.save();
+  const tareaAlmacenada = await Tarea.findById(id).populate('proyecto').populate('completado');
+  res.json(tareaAlmacenada);
+ 
+
+
+  
 }
 
 export {agregarTarea, obtenerTarea, actualizarTarea, eliminarTarea, cambiarEstado};
