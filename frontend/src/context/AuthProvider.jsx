@@ -42,13 +42,19 @@ const AuthProvider = ({children}) => {
     authUsuario();
   },[]);
 
+  const cerrarSesionAuth = () => {
+    setAuth({});
+   
+  }
+
 
   return(
     <AuthContext.Provider
     value={{
       auth,
       loading,
-      setAuth
+      setAuth,
+      cerrarSesionAuth
     }}>
       {children}
     </AuthContext.Provider>

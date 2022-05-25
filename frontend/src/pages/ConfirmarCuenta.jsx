@@ -1,6 +1,6 @@
 //import {useParams} from 'react-router-dom';
 import {useState, useEffect} from 'react';
-import {useParams, Link} from 'react-router-dom';
+import {useParams, useNavigate, Link} from 'react-router-dom';
 import clientAxios from '../config/clientAxios';
 import Alerta from '../components/Alerta';
 
@@ -10,6 +10,7 @@ export const ConfirmarCuenta = () => {
   const [cuentaConfirmada, setCuentaConfirmada] = useState(false);
 
   const params = useParams();
+  const navigate = useNavigate();
   
   const {id} = params;
 
@@ -31,6 +32,9 @@ export const ConfirmarCuenta = () => {
       }
     }
     confirmarCuenta();
+    setTimeout(()=>{
+      navigate('/');
+    },3000);
   }, []);
 
   const {msg} = alerta;

@@ -1,28 +1,38 @@
 import {Link, useNavigate} from 'react-router-dom';
+import useProyectos from '../hooks/useProyectos';
+import useAuth from '../hooks/useAuth';
+import Busqueda from './Busqueda';
 
 export const Header = () => {
 
+  const {handleBuscador, cerrarSesionProyectos} = useProyectos();
+  const {cerrarSesionAuth} = useAuth();
+
   const navigate = useNavigate();
   //cerrar sesion
-  const cerrarSesion = e => {
-    e.preventDefault();
+  const cerrarSesion = () => {
+    cerrarSesionAuth();
+    cerrarSesionProyectos();
     localStorage.removeItem('token');
-   
-    navigate('/');
+  
   }
 
   return (
     <header className="px-4 py-5 bg-white border-b">
       <div className="md:flex md:justify-between">
-        <h2 className="text-4xl text-sky-600 font-black text-center">Uptask</h2>
+      <div className='flex items-center gap-4 justify-between md:justify-start' >
+        <h2 className="text-4xl text-sky-600 font-black text-center mb-5 md:m-0">Uptask</h2>
+        <button className='block md:hidden text-white text-sm bg-sky-600 rounded-md uppercase font-bold p-2 hover:bg-sky-700 transition-colors' type="button" onClick={cerrarSesion}>Cerrar sesión</button>
+        </div>
 
-        <input type="search" 
-          className="rounded-lg lg:w-96 block p-2 border focus:outline-none focus:border-sky-600 focus:bg-gray-200 focus:placeholder-sky-600"
-          placeholder="Buscar proyecto"
-        />
-        <div className='flex items-center gap-4' >
-          <Link className="font-bold uppercase" to="/proyectos">Proyectos</Link>
-          <button className='text-white text-sm bg-sky-600 rounded-md uppercase font-bold p-3 hover:bg-sky-700 transition-colors' type="button" onClick={cerrarSesion}>Cerrar sesión</button>
+        <div className='flex flex-col md:flex-row items-center gap-4 justify-center md:justify-start' >
+          <button className='font-bold uppercase text-gray-700 hover:text-black' type="button"><div className="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 pr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+</svg><span className='hover:underline hover:underline-offset-4' onClick={handleBuscador}>Buscar Proyecto</span></div></button>
+          <Link className="font-bold uppercase text-gray-700 hover:text-black hover:underline hover:underline-offset-4" to="/proyectos">Proyectos</Link>
+          <button className='hidden md:block text-white text-sm bg-sky-600 rounded-md uppercase font-bold p-3 hover:bg-sky-700 transition-colors' type="button" onClick={cerrarSesion}>Cerrar sesión</button>
+
+          <Busqueda />
         </div>
       </div>
     </header>
